@@ -427,6 +427,26 @@ describe('Page', () => {
         expect(runnedInPhantomRuntime).toBe(true);
     });
 
+    it('#on() can register at the same \'onCallback\' event to run locally or in phantom runtime', function* () {
+        let page = yield phantom.createPage();
+        let runnedHere = false;
+
+        yield page.on('onCallback', true, function () {
+            runnedInPhantomRuntime = true;
+        });
+
+        yield page.on('onCallback', function () {
+            runnedHere = true;
+        });
+
+        yield page.open('http://localhost:8888/test');
+
+        let runnedInPhantomRuntime = yield phantom.windowProperty('runnedInPhantomRuntime');
+
+        expect(runnedHere).toBe(true);
+        expect(runnedInPhantomRuntime).toBe(true);
+    });
+
     it('#off() can disable an event whose listener is going to run locally', function*() {
 
         let page = yield phantom.createPage();
