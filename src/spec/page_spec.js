@@ -430,21 +430,30 @@ describe('Page', () => {
     it('#on() can register at the same \'onCallback\' event to run locally or in phantom runtime', function* () {
         let page = yield phantom.createPage();
         let runnedHere = false;
+	let value = null;
 
-        yield page.on('onCallback', true, function () {
+        yield page.on('onCallback', true, function (data) {
             runnedInPhantomRuntime = true;
         });
 
-        yield page.on('onCallback', function () {
+        yield page.on('onCallback', function (data) {
             runnedHere = true;
+	    value = data;
         });
 
-        yield page.open('http://localhost:8888/test');
-
-        let runnedInPhantomRuntime = yield phantom.windowProperty('runnedInPhantomRuntime');
-
-        expect(runnedHere).toBe(true);
-        expect(runnedInPhantomRuntime).toBe(true);
+	runs(function(){
+	    page.evaluate(function(){
+	        window.callPhantom({ "foo": "bar" });
+	    });
+	}
+	waitsFor(function(){
+            let runnedInPhantomRuntime = yield phantom.windowProperty('runnedInPhantomRuntime');
+        });
+	runs(function(){
+            expect(runnedHere).toBe(true);
+	    expect(runnedInPhantomRuntime).toBe(true);
+            expect(value).toEqual({ "foo": "bar" });
+	});
     });
 
     it('#off() can disable an event whose listener is going to run locally', function*() {
