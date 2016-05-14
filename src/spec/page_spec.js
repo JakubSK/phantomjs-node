@@ -437,8 +437,8 @@ describe('Page', () => {
         });
 
         yield page.on('onCallback', function (data) {
-            runnedHere = true;
 	    value = data;
+            runnedHere = true;
         });
 
 	runs(function(){
@@ -447,9 +447,10 @@ describe('Page', () => {
 	    });
 	}
 	waitsFor(function(){
-            let runnedInPhantomRuntime = yield phantom.windowProperty('runnedInPhantomRuntime');
+            return runnedHere;
         });
 	runs(function(){
+            let runnedInPhantomRuntime = yield phantom.windowProperty('runnedInPhantomRuntime');
             expect(runnedHere).toBe(true);
 	    expect(runnedInPhantomRuntime).toBe(true);
             expect(value).toEqual({ "foo": "bar" });
